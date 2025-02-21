@@ -11,7 +11,7 @@ terraform_down:
 	cd infra && terraform destroy
 
 api_local:
-	. env.sh && cd api/api/ && uvicorn main:app --reload
+	source .venv/bin/activate && . env.sh && cd api/ && uvicorn api.main:app --reload
 
 app_local:
 	. env.sh && cd gif-judge && npm start
