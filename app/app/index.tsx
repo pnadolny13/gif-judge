@@ -4,6 +4,7 @@ import { Link, router } from 'expo-router';
 import { ThemedView } from '../components/ThemedView';
 import { ThemedText } from '../components/ThemedText';
 import { GameProvider } from '../components/game/GameContext';
+import Constants from 'expo-constants';
 
 export default function HomeScreen() {
   const [playerName, setPlayerName] = useState('');
@@ -17,7 +18,7 @@ export default function HomeScreen() {
     }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_REST_API_URL}/v1/game`, {
+      const response = await fetch(`${Constants.expoConfig?.extra?.REACT_APP_REST_API_URL}v1/game`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ export default function HomeScreen() {
     }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_REST_API_URL}/v1/game/${gameId}/join`, {
+      const response = await fetch(`${Constants.expoConfig?.extra?.REACT_APP_REST_API_URL}v1/game/${gameId}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

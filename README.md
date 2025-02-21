@@ -24,9 +24,9 @@ Add these to your .env file:
 export GIPHY_API_KEY=""
 export AWS_ACCESS=""
 export AWS_SECRET=""
-export REACT_APP_REST_API_URL=http://127.0.0.1:8000/
-export REACT_APP_WS_API_URL=ws://127.0.0.1:8000/
-export WEBSOCKET_API_ENDPOINT=ws://127.0.0.1:8000/
+export REACT_APP_REST_API_URL=http://127.0.0.1:8000
+export REACT_APP_WS_API_URL=ws://127.0.0.1:8000
+export WEBSOCKET_API_ENDPOINT=ws://127.0.0.1:8000
 ```
 
 ```

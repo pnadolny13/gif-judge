@@ -3,6 +3,7 @@ from typing import Dict, List
 from datetime import datetime
 import asyncio
 import json
+import uuid
 
 from ..models.game import (
     Game,
