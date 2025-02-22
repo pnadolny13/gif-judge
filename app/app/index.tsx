@@ -3,7 +3,6 @@ import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Link, router } from 'expo-router';
 import { ThemedView } from '../components/ThemedView';
 import { ThemedText } from '../components/ThemedText';
-import { GameProvider } from '../components/game/GameContext';
 import Constants from 'expo-constants';
 
 export default function HomeScreen() {
@@ -18,7 +17,8 @@ export default function HomeScreen() {
     }
 
     try {
-      const response = await fetch(`${Constants.expoConfig?.extra?.REACT_APP_REST_API_URL}v1/game`, {
+      const baseUrl = Constants.expoConfig?.extra?.REACT_APP_REST_API_URL || 'http://127.0.0.1:8000';
+      const response = await fetch(`${baseUrl}v1/game`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +53,8 @@ export default function HomeScreen() {
     }
 
     try {
-      const response = await fetch(`${Constants.expoConfig?.extra?.REACT_APP_REST_API_URL}v1/game/${gameId}/join`, {
+      const baseUrl = Constants.expoConfig?.extra?.REACT_APP_REST_API_URL || 'http://127.0.0.1:8000';
+      const response = await fetch(`${baseUrl}v1/game/${gameId}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,49 +83,47 @@ export default function HomeScreen() {
   };
 
   return (
-    <GameProvider>
-      <ThemedView style={styles.container}>
-        <ThemedText style={styles.title}>GIF Judge</ThemedText>
-        
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            value={playerName}
-            onChangeText={setPlayerName}
-            placeholder="Enter your name"
-            placeholderTextColor="#999"
-          />
+    <ThemedView style={styles.container}>
+      <ThemedText style={styles.title}>GIF Judge</ThemedText>
+      
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={playerName}
+          onChangeText={setPlayerName}
+          placeholder="Enter your name"
+          placeholderTextColor="#999"
+        />
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleCreateGame}
-          >
-            <ThemedText style={styles.buttonText}>Create New Game</ThemedText>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleCreateGame}
+        >
+          <ThemedText style={styles.buttonText}>Create New Game</ThemedText>
+        </TouchableOpacity>
 
-          <ThemedText style={styles.orText}>- OR -</ThemedText>
+        <ThemedText style={styles.orText}>- OR -</ThemedText>
 
-          <TextInput
-            style={styles.input}
-            value={gameId}
-            onChangeText={setGameId}
-            placeholder="Enter game ID"
-            placeholderTextColor="#999"
-          />
+        <TextInput
+          style={styles.input}
+          value={gameId}
+          onChangeText={setGameId}
+          placeholder="Enter game ID"
+          placeholderTextColor="#999"
+        />
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleJoinGame}
-          >
-            <ThemedText style={styles.buttonText}>Join Game</ThemedText>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleJoinGame}
+        >
+          <ThemedText style={styles.buttonText}>Join Game</ThemedText>
+        </TouchableOpacity>
 
-          {error ? (
-            <ThemedText style={styles.errorText}>{error}</ThemedText>
-          ) : null}
-        </View>
-      </ThemedView>
-    </GameProvider>
+        {error ? (
+          <ThemedText style={styles.errorText}>{error}</ThemedText>
+        ) : null}
+      </View>
+    </ThemedView>
   );
 }
 

@@ -43,11 +43,10 @@ export const GameProvider: React.FC<{children: React.ReactNode}> = ({ children }
     
     const connectWebSocket = () => {
       // Initialize WebSocket connection
-      const wsUrl = Constants.expoConfig?.extra?.REACT_APP_WS_API_URL?.endsWith('/')
-        ? Constants.expoConfig.extra.REACT_APP_WS_API_URL.slice(0, -1)
-        : Constants.expoConfig.extra.REACT_APP_WS_API_URL;
+      const wsUrl = Constants.expoConfig?.extra?.REACT_APP_WS_API_URL || 'ws://127.0.0.1:8000';
+      const baseWsUrl = wsUrl.endsWith('/') ? wsUrl.slice(0, -1) : wsUrl;
         
-      websocket = new WebSocket(`${wsUrl}/v1/ws/${gameState.gameId || ''}`);
+      websocket = new WebSocket(`${baseWsUrl}v1/ws/${gameState.gameId || ''}`);
       
       websocket.onmessage = (event: MessageEvent) => {
         const data = JSON.parse(event.data);
@@ -96,7 +95,8 @@ export const GameProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
   const createGame = async () => {
     try {
-      const response = await fetch(`${Constants.expoConfig?.extra?.REACT_APP_REST_API_URL}v1/game`, {
+      const baseUrl = Constants.expoConfig?.extra?.REACT_APP_REST_API_URL || 'http://127.0.0.1:8000';
+      const response = await fetch(`${baseUrl}v1/game`, {
         method: 'POST',
       });
       const data = await response.json();
@@ -112,7 +112,8 @@ export const GameProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
   const joinGame = async (gameId: string) => {
     try {
-      const response = await fetch(`${Constants.expoConfig?.extra?.REACT_APP_REST_API_URL}v1/game/${gameId}/join`, {
+      const baseUrl = Constants.expoConfig?.extra?.REACT_APP_REST_API_URL || 'http://127.0.0.1:8000';
+      const response = await fetch(`${baseUrl}v1/game/${gameId}/join`, {
         method: 'POST',
       });
       const data = await response.json();
@@ -129,7 +130,8 @@ export const GameProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const submitGif = async (gifUrl: string) => {
     if (!gameState.gameId) return;
     try {
-      await fetch(`${Constants.expoConfig?.extra?.REACT_APP_REST_API_URL}v1/game/${gameState.gameId}/submit`, {
+      const baseUrl = Constants.expoConfig?.extra?.REACT_APP_REST_API_URL || 'http://127.0.0.1:8000';
+      await fetch(`${baseUrl}v1/game/${gameState.gameId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +146,8 @@ export const GameProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const submitPhrase = async (phrase: string) => {
     if (!gameState.gameId || !gameState.isJudge) return;
     try {
-      await fetch(`${Constants.expoConfig?.extra?.REACT_APP_REST_API_URL}v1/game/${gameState.gameId}/phrase`, {
+      const baseUrl = Constants.expoConfig?.extra?.REACT_APP_REST_API_URL || 'http://127.0.0.1:8000';
+      await fetch(`${baseUrl}v1/game/${gameState.gameId}/phrase`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +162,8 @@ export const GameProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const selectWinner = async (playerId: string) => {
     if (!gameState.gameId || !gameState.isJudge) return;
     try {
-      await fetch(`${Constants.expoConfig?.extra?.REACT_APP_REST_API_URL}v1/game/${gameState.gameId}/winner`, {
+      const baseUrl = Constants.expoConfig?.extra?.REACT_APP_REST_API_URL || 'http://127.0.0.1:8000';
+      await fetch(`${baseUrl}v1/game/${gameState.gameId}/winner`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
