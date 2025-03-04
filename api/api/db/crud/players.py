@@ -38,3 +38,4 @@ async def read_players(game_id: str) -> List[Player]:
     )
     if resp:
         return [Player(**player) for player in resp]
+    return []

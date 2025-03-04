@@ -19,7 +19,7 @@ export default function LobbyScreen() {
         setGame(updatedGame);
 
         // If the game has started, navigate to the game screen
-        if (updatedGame.status === 'in_progress') {
+        if (updatedGame.game_status === 'in_progress') {
           router.push({
             pathname: "/game",
             params: { 

@@ -1,7 +1,7 @@
 import time
 from typing import List
 
-from db.crud.games import read_game
+from db.crud.games import get_game
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import asyncio
 
@@ -37,12 +37,12 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
         data_cache = None
         while True:
             if data_cache:
-                potentially_new_data = await read_game(game_id)
+                potentially_new_data = await get_game(game_id)
                 if data_cache != potentially_new_data:
                     data_cache = potentially_new_data
                     await manager.broadcast(data_cache.json())
             else:
-                data_cache = await read_game(game_id)
+                data_cache = await get_game(game_id)
                 await manager.broadcast(data_cache.json())
             if count >= timeout:
                 raise WebSocketDisconnect("Timed out.")

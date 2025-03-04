@@ -3,10 +3,17 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput,
 import { router } from 'expo-router';
 import { api } from '../services/api';
 
+// Update the local game state type to match what we need
+type GameState = {
+  id: string;
+  room_code: string;
+  host_id: string;
+};
+
 export default function CreateGameScreen() {
   const [isCreating, setIsCreating] = useState(false);
   const [playerName, setPlayerName] = useState('');
-  const [game, setGame] = useState<{ room_code: string; host_id: string } | null>(null);
+  const [game, setGame] = useState<GameState | null>(null);
 
   const createGame = async () => {
     if (!playerName.trim()) {
@@ -19,8 +26,14 @@ export default function CreateGameScreen() {
       console.log('Creating game...');
       const newGame = await api.createGame(playerName);
       console.log('Game created:', newGame);
+      
+      if (!newGame.host_id) {
+        throw new Error('No host ID returned from game creation');
+      }
+
       setGame({
-        room_code: newGame.room_code,
+        id: newGame.id,
+        room_code: newGame.id,
         host_id: newGame.host_id,
       });
     } catch (error) {

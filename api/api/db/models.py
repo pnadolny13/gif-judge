@@ -2,8 +2,13 @@ from datetime import datetime
 from typing import Any, Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+class Player(BaseModel):
+    id: str
+    game_id: str
+    name: str
+    game_score: Optional[int] = 0
 
 class Game(BaseModel):
     id: str
@@ -13,13 +18,9 @@ class Game(BaseModel):
     phrase: Optional[str] = None
     round_start_ts: Optional[str] = None
     round_end_ts: Optional[str] = None
-
-
-class Player(BaseModel):
-    id: str
-    game_id: str
-    name: str
-    game_score: Optional[int] = 0
+    players: list[Player] = Field(default_factory=list)
+    game_status: Optional[str] = None
+    host_id: Optional[str] = None
 
 
 class Selection(BaseModel):

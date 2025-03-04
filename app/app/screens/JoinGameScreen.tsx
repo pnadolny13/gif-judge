@@ -24,11 +24,11 @@ export default function JoinGameScreen() {
 
     setIsJoining(true);
     try {
-      const { game, player } = await api.joinGame(roomCode.toUpperCase(), playerName);
+      const { game, player } = await api.joinGame(roomCode, playerName);
       router.push({
         pathname: "/lobby",
         params: { 
-          roomCode: game.room_code, 
+          roomCode: game.id, 
           isHost: false,
           playerId: player.id
         }
@@ -48,11 +48,11 @@ export default function JoinGameScreen() {
         <TextInput
           style={styles.input}
           value={roomCode}
-          onChangeText={text => setRoomCode(text.toUpperCase())}
+          onChangeText={text => setRoomCode(text)}
           placeholder="Room Code"
           placeholderTextColor="#666666"
-          maxLength={6}
-          autoCapitalize="characters"
+          // maxLength={6}
+          // autoCapitalize="characters"
         />
         
         <Text style={styles.subtitle}>Enter your name:</Text>

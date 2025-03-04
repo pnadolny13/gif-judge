@@ -5,21 +5,23 @@ const GIPHY_API_KEY = process.env.EXPO_PUBLIC_GIPHY_API_KEY;
 
 export interface Player {
   id: string;
+  game_id: string;
   name: string;
-  score: number;
-  is_host: boolean;
-  is_judge: boolean;
+  game_score?: number;
 }
 
 export interface Game {
   id: string;
+  name?: string;
+  round_num?: number;
+  judge_player_id?: string;
+  phrase?: string;
+  round_start_ts?: string;
+  round_end_ts?: string;
   room_code: string;
-  host_id: string;
-  players: Player[];
-  current_round_id: string | null;
-  status: 'waiting' | 'in_progress' | 'completed';
-  winner_id: string | null;
-  created_at: string;
+  host_id?: string;
+  players?: Player[];
+  game_status?: 'waiting' | 'in_progress' | 'completed';
 }
 
 export interface GifSubmission {
@@ -73,16 +75,38 @@ class ApiService {
   // Game Management
   async createGame(playerName: string): Promise<Game> {
     console.log(`Creating game with player name: ${playerName}`);
-    console.log(`API URL: ${this.API_URL}`);
-
+    
     try {
-      const response = await fetch(`${this.API_URL}/game/`, {
+      // First create the game
+      const response = await fetch(`${this.API_URL}/games/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player_name: playerName }),
+        body: JSON.stringify({ name: playerName }),
       });
       
-      return this.handleResponse<Game>(response);
+      const game = await this.handleResponse<Game>(response);
+
+      // Then create the host player in that game
+      const playerResponse = await fetch(`${this.API_URL}/game/${game.id}/player`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: playerName }),
+      });
+
+      const player = await this.handleResponse<Player>(playerResponse);
+      
+      // Update the game with the host and judge player
+      const updateResponse = await fetch(`${this.API_URL}/games/${game.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          host_id: player.id,
+          judge_player_id: player.id,
+          game_status: 'waiting'
+        }),
+      });
+
+      return await this.handleResponse<Game>(updateResponse);
     } catch (error) {
       console.error('Create game error:', error);
       throw error;
@@ -91,10 +115,10 @@ class ApiService {
 
   async joinGame(roomCode: string, playerName: string): Promise<{ game: Game; player: Player }> {
     try {
-      const response = await fetch(`${this.API_URL}/games/${roomCode}/join`, {
+      const response = await fetch(`${this.API_URL}/games/${roomCode}/players`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player_name: playerName }),
+        body: JSON.stringify({ name: playerName }),
       });
       
       return this.handleResponse<{ game: Game; player: Player }>(response);
