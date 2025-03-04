@@ -14,3 +14,5 @@ gif-judge/.netlify/*
 gif-judge/build/*
 
 venv*
+*.expo
+.venv/*
