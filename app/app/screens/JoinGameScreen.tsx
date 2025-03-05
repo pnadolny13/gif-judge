@@ -24,16 +24,23 @@ export default function JoinGameScreen() {
 
     setIsJoining(true);
     try {
-      const { game, player } = await api.joinGame(roomCode, playerName);
+      console.log('Attempting to join game...');
+      const result = await api.joinGame(roomCode, playerName);
+      console.log('Raw join game result:', result);
+      const { player } = result;
+      console.log('Extracted player:', player);
+      
       router.push({
         pathname: "/lobby",
         params: { 
-          roomCode: game.id, 
-          isHost: false,
+          roomCode: player.game_id, 
+          isHost: "false",
           playerId: player.id
         }
       });
+      console.log('Router.push completed');
     } catch (error) {
+      console.error('Join game error:', error);
       Alert.alert('Error', 'Failed to join game. Please check the room code and try again.');
     } finally {
       setIsJoining(false);

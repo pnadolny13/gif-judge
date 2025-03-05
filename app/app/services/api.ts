@@ -116,7 +116,7 @@ class ApiService {
     }
   }
 
-  async joinGame(roomCode: string, playerName: string): Promise<{ game: Game; player: Player }> {
+  async joinGame(roomCode: string, playerName: string): Promise<{ player: Player }> {
     try {
       const response = await fetch(`${this.API_URL}/games/${roomCode}/players`, {
         method: 'POST',
@@ -124,7 +124,10 @@ class ApiService {
         body: JSON.stringify({ name: playerName }),
       });
       
-      return this.handleResponse<{ game: Game; player: Player }>(response);
+      const data = await this.handleResponse<Player>(response);
+      console.log('API response data:', data);
+      
+      return { player: data };
     } catch (error) {
       console.error('Join game error:', error);
       throw error;
