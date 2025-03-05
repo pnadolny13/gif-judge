@@ -24,7 +24,7 @@ class Round(BaseModel):
     prompt: Optional[str] = None
     submissions: dict[str, GifSubmission] = Field(default_factory=dict)
     winner_id: Optional[str] = None
-    status: str = 'waiting'  # waiting, in_progress, judging, completed
+    round_status: str = 'waiting'  # waiting, in_progress, judging, completed
     created_at: str
     ends_at: Optional[str] = None
 
