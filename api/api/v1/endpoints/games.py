@@ -16,6 +16,9 @@ class PostNewGame(BaseModel):
 class PostGamePhrase(BaseModel):
     phrase: str
 
+class StartGameRequest(BaseModel):
+    host_id: str
+
 @router.post("/", response_model=Game)
 async def post_game(new_game: PostNewGame):
     """Returns a new game"""
@@ -108,3 +111,45 @@ async def judge_round(game_id: str, round_id: str, judge_id: str, winner_id: str
     game.players = game_players
     
     return {"round": round, "game": game}
+
+@router.post("/{game_id}/start", response_model=dict)
+async def start_game(game_id: str, request: StartGameRequest):
+    """Start a game and create the first round"""
+    # Get game and verify host
+    game = await games.get_game(game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    if game.host_id != request.host_id:
+        raise HTTPException(status_code=403, detail="Only the host can start the game")
+
+    # Update game status
+    game = await games.update_game_properties(game_id, {
+        "game_status": "in_progress",
+        "round_num": 1
+    })
+
+    # Create first round with current judge
+    round = await games.create_round(game_id, game.judge_player_id)
+
+    # Get all players for the response
+    game_players = await players.read_players(game_id)
+    game.players = game_players
+
+    return {
+        "game": game,
+        "round": round
+    }
+
+@router.get("/{game_id}/rounds/current", response_model=Round)
+async def get_current_round(game_id: str):
+    """Get the current active round for a game"""
+    game = await games.get_game(game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    
+    # Get the most recent round for the game
+    round = await games.get_latest_round(game_id)
+    if not round:
+        raise HTTPException(status_code=404, detail="No rounds found")
+    
+    return round

@@ -15,7 +15,20 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { api, Game, Round, GiphyGif } from '../services/api';
 
 export default function GameScreen() {
-  const { roomCode, playerId, roundId } = useLocalSearchParams<{ roomCode: string; playerId: string; roundId: string }>();
+  const params = useLocalSearchParams<{ roomCode: string; playerId: string; roundId: string }>();
+  const roomCode = params?.roomCode || '';
+  const playerId = params?.playerId || '';
+  const roundId = params?.roundId || '';
+
+  useEffect(() => {
+    if (!roomCode || !playerId || !roundId) {
+      console.error('Missing required parameters:', { roomCode, playerId, roundId });
+      Alert.alert('Error', 'Missing required game parameters');
+      router.back();
+      return;
+    }
+  }, [roomCode, playerId, roundId]);
+
   const [game, setGame] = useState<Game | null>(null);
   const [round, setRound] = useState<Round | null>(null);
   const [prompt, setPrompt] = useState('');
@@ -25,7 +38,10 @@ export default function GameScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Poll for game and round updates
+    if (!roomCode || !roundId) {
+      return;
+    }
+
     const pollInterval = setInterval(async () => {
       try {
         const [gameResponse, roundResponse] = await Promise.all([
@@ -45,7 +61,6 @@ export default function GameScreen() {
         setGame(gameData);
         setRound(roundData);
 
-        // Handle game completion
         if (gameData.status === 'completed') {
           router.push({
             pathname: "/results",

@@ -9,8 +9,6 @@ export default function LobbyScreen() {
   const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
-    // TODO: Implement WebSocket connection to get real-time updates
-    // For now, we'll poll the API every 3 seconds
     const pollInterval = setInterval(async () => {
       try {
         const response = await fetch(`${api.API_URL}/games/${roomCode}`);
@@ -18,16 +16,24 @@ export default function LobbyScreen() {
         const updatedGame = await response.json();
         setGame(updatedGame);
 
-        // If the game has started, navigate to the game screen
-        if (updatedGame.game_status === 'in_progress') {
-          router.push({
-            pathname: "/game",
-            params: { 
-              roomCode: updatedGame.room_code,
-              playerId,
-              roundId: updatedGame.current_round_id
+        // If the game has started but we're not the host, we need to fetch the current round
+        if (updatedGame.game_status === 'in_progress' && isHost !== 'true') {
+          try {
+            const roundResponse = await fetch(`${api.API_URL}/games/${roomCode}/rounds/current`);
+            if (roundResponse.ok) {
+              const currentRound = await roundResponse.json();
+              router.push({
+                pathname: "/game",
+                params: { 
+                  roomCode,
+                  playerId,
+                  roundId: currentRound.id
+                }
+              });
             }
-          });
+          } catch (error) {
+            console.error('Error fetching current round:', error);
+          }
         }
       } catch (error) {
         console.error('Error polling game state:', error);
@@ -42,13 +48,15 @@ export default function LobbyScreen() {
 
     setIsStarting(true);
     try {
-      const { game: updatedGame } = await api.startGame(roomCode, playerId);
+      const response = await api.startGame(roomCode, playerId);
+      const { game: updatedGame, round } = response;
+      
       router.push({
         pathname: "/game",
         params: { 
-          roomCode: updatedGame.room_code,
+          roomCode,
           playerId,
-          roundId: updatedGame.current_round_id
+          roundId: round.id
         }
       });
     } catch (error) {

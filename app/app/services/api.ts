@@ -5,23 +5,19 @@ const GIPHY_API_KEY = process.env.EXPO_PUBLIC_GIPHY_API_KEY;
 
 export interface Player {
   id: string;
-  game_id: string;
   name: string;
-  game_score?: number;
+  score: number;
+  game_id: string;
 }
 
 export interface Game {
   id: string;
-  name?: string;
-  round_num?: number;
-  judge_player_id?: string;
-  phrase?: string;
-  round_start_ts?: string;
-  round_end_ts?: string;
-  room_code: string;
-  host_id?: string;
-  players?: Player[];
-  game_status?: 'waiting' | 'in_progress' | 'completed';
+  game_status: 'waiting' | 'in_progress' | 'completed';
+  host_id: string;
+  judge_player_id: string;
+  round_id?: string;
+  round_num: number;
+  players: Player[];
 }
 
 export interface GifSubmission {
@@ -135,13 +131,19 @@ class ApiService {
     }
   }
 
-  async startGame(roomCode: string, hostId: string): Promise<{ game: Game; round: Round }> {
+  async startGame(gameId: string, hostId: string): Promise<{ game: Game; round: Round }> {
     try {
-      const response = await fetch(`${this.API_URL}/games/${roomCode}/start`, {
+      const response = await fetch(`${this.API_URL}/games/${gameId}/start`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ host_id: hostId }),
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to start game');
+      }
       
       return this.handleResponse<{ game: Game; round: Round }>(response);
     } catch (error) {
