@@ -88,8 +88,8 @@ async def submit_gif(game_id: str, round_id: str, submission: GifSubmission) -> 
         round = Round(**resp.get("Attributes"))
         # If all non-judge players have submitted, change status to judging
         game = await get_game(game_id)
-        # TODO: theres still a bug here
-        if game and len(round.submissions) >= len(game.players) - 1:
+        # TODO: theres still a bug here. Game and Game response should be different
+        if game and len(round.submissions) >= len(game.player_ids) - 1:
             round = await update_round_status(game_id, round_id, "judging")
         return round
     return None
