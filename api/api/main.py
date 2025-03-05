@@ -12,6 +12,8 @@ app.include_router(router, prefix="/v1")
 origins = [
     "http://localhost:3000",
     "http://localhost:3001",
+    "http://localhost:8081",
+    "http://localhost:8080",
     "https://pnadolny13.github.io",
     "https://gif-judge.netlify.app",
 ]
