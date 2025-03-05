@@ -247,7 +247,9 @@ resource "aws_iam_role" "lambda_exec" {
             "${aws_dynamodb_table.players.arn}",
             "${aws_dynamodb_table.players.arn}/*",
             "${aws_dynamodb_table.selections.arn}",
-            "${aws_dynamodb_table.selections.arn}/*"
+            "${aws_dynamodb_table.selections.arn}/*",
+            "${aws_dynamodb_table.rounds.arn}",
+            "${aws_dynamodb_table.rounds.arn}/*"
           ]
         }
       ]
@@ -577,6 +579,33 @@ resource "aws_dynamodb_table" "connections" {
     type = "S"
   }
 
+}
+
+resource "aws_dynamodb_table" "rounds" {
+  name           = "rounds"
+  billing_mode   = "PROVISIONED"
+  read_capacity  = 1
+  write_capacity = 1
+  hash_key       = "id"
+  range_key      = "game_id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  attribute {
+    name = "game_id"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name               = "GameIdIndex"
+    hash_key          = "game_id"
+    projection_type    = "ALL"
+    read_capacity     = 1
+    write_capacity    = 1
+  }
 }
 
 resource "aws_lambda_event_source_mapping" "game_trigger" {

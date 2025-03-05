@@ -10,6 +10,22 @@ class Player(BaseModel):
     name: str
     game_score: Optional[int] = 0
 
+class GifSubmission(BaseModel):
+    player_id: str
+    gif_url: str
+    prompt: str
+
+class Round(BaseModel):
+    id: str
+    game_id: str
+    judge_id: str
+    prompt: Optional[str] = None
+    submissions: dict[str, GifSubmission] = Field(default_factory=dict)
+    winner_id: Optional[str] = None
+    status: str = 'waiting'  # waiting, in_progress, judging, completed
+    created_at: str
+    ends_at: Optional[str] = None
+
 class Game(BaseModel):
     id: str
     name: Optional[str] = None

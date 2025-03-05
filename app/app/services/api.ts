@@ -77,11 +77,14 @@ class ApiService {
     console.log(`Creating game with player name: ${playerName}`);
     
     try {
-      // First create the game
+      // First create the game with initial player as host
       const response = await fetch(`${this.API_URL}/games/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: playerName }),
+        body: JSON.stringify({ 
+          name: playerName,
+          game_status: 'waiting'
+        }),
       });
       
       const game = await this.handleResponse<Game>(response);
@@ -90,19 +93,23 @@ class ApiService {
       const playerResponse = await fetch(`${this.API_URL}/game/${game.id}/player`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: playerName }),
+        body: JSON.stringify({ 
+          name: playerName,
+          is_host: true,
+          is_judge: true
+        }),
       });
 
       const player = await this.handleResponse<Player>(playerResponse);
       
-      // Update the game with the host and judge player
+      // Update the game with the host and judge player in a single update
       const updateResponse = await fetch(`${this.API_URL}/games/${game.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           host_id: player.id,
           judge_player_id: player.id,
-          game_status: 'waiting'
+          players: [player]
         }),
       });
 
