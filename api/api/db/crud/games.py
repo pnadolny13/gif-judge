@@ -72,19 +72,23 @@ async def update_round_prompt(game_id: str, round_id: str, judge_id: str, prompt
 
 async def submit_gif(game_id: str, round_id: str, submission: GifSubmission) -> Round:
     """Submit a GIF for a round"""
+    update_expr = "set submissions.#pid = :sub"
+    expr_values = {":sub": submission.dict()}
+    expr_attr_names = {"#pid": submission.player_id}
+    
     resp = DynamoDB().update_item(
         "rounds",
         {"id": round_id, "game_id": game_id},
-        "set submissions.#pid = :sub",
-        {
-            ":sub": submission.dict()
-        },
-        {"#pid": submission.player_id}
+        update_expr,
+        expr_values,
+        expr_attr_names
     )
+    
     if resp:
         round = Round(**resp.get("Attributes"))
         # If all non-judge players have submitted, change status to judging
         game = await get_game(game_id)
+        # TODO: theres still a bug here
         if game and len(round.submissions) >= len(game.players) - 1:
             round = await update_round_status(game_id, round_id, "judging")
         return round

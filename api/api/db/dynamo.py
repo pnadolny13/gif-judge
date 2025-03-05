@@ -45,12 +45,16 @@ class DynamoDB:
             complete = True if next_key is None else False
         return records
 
-    def update_item(self, table_name: str, key: dict, expression: str, attrb_vals: dict):
-        table = self.dynamodb.Table(table_name)      
-        resp = table.update_item(
-            Key=key,
-            UpdateExpression=expression,
-            ExpressionAttributeValues=attrb_vals,
-            ReturnValues="ALL_NEW"
-        )
+    def update_item(self, table_name: str, key: dict, expression: str, attrb_vals: dict, attrb_names: dict = None):
+        table = self.dynamodb.Table(table_name)
+        params = {
+            'Key': key,
+            'UpdateExpression': expression,
+            'ExpressionAttributeValues': attrb_vals,
+            'ReturnValues': "ALL_NEW"
+        }
+        if attrb_names:
+            params['ExpressionAttributeNames'] = attrb_names
+        
+        resp = table.update_item(**params)
         return resp
