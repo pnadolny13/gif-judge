@@ -24,7 +24,7 @@ async def create_round(game_id: str, judge_id: str) -> Round:
         id=str(uuid4()),
         game_id=game_id,
         judge_id=judge_id,
-        status='waiting',
+        round_status='waiting',
         created_at=str(now.isoformat()) + 'Z'
     )
     DynamoDB().put_item(
@@ -44,14 +44,14 @@ async def get_round(game_id: str, round_id: str) -> Round:
     return None
 
 async def update_round_prompt(game_id: str, round_id: str, judge_id: str, prompt: str) -> Round:
-    """Update a round's prompt and change status to in_progress"""
+    """Update a round's prompt and change round_status to in_progress"""
     now = datetime.utcnow()
     end = now + timedelta(minutes=2)  # 2 minutes to submit GIFs
     
     resp = DynamoDB().update_item(
         "rounds",
         {"id": round_id, "game_id": game_id},
-        "set prompt=:p, status=:s, ends_at=:e",
+        "set prompt=:p, round_status=:s, ends_at=:e",
         {
             ":p": prompt,
             ":s": "in_progress",
@@ -87,7 +87,7 @@ async def update_round_status(game_id: str, round_id: str, status: str) -> Round
     resp = DynamoDB().update_item(
         "rounds",
         {"id": round_id, "game_id": game_id},
-        "set status=:s",
+        "set round_status=:s",
         {":s": status}
     )
     if resp:
@@ -99,7 +99,7 @@ async def select_winner(game_id: str, round_id: str, judge_id: str, winner_id: s
     resp = DynamoDB().update_item(
         "rounds",
         {"id": round_id, "game_id": game_id},
-        "set winner_id=:w, status=:s",
+        "set winner_id=:w, round_status=:s",
         {
             ":w": winner_id,
             ":s": "completed"

@@ -164,7 +164,7 @@ export default function GameScreen() {
           style={styles.submittedGif}
           resizeMode="cover"
         />
-        {round?.judge_id === playerId && round.status === 'judging' && (
+        {round?.judge_id === playerId && round.round_status === 'judging' && (
           <TouchableOpacity
             style={styles.selectWinnerButton}
             onPress={() => selectWinner(submitterId)}
@@ -199,7 +199,7 @@ export default function GameScreen() {
         </Text>
       </View>
 
-      {round.status === 'waiting' && isJudge && (
+      {round.round_status === 'waiting' && isJudge && (
         <View style={styles.promptContainer}>
           <Text style={styles.subtitle}>Enter a prompt for players:</Text>
           <TextInput
@@ -224,7 +224,7 @@ export default function GameScreen() {
         </View>
       )}
 
-      {round.status === 'in_progress' && round.prompt && !isJudge && (
+      {round.round_status === 'in_progress' && round.prompt && !isJudge && (
         <View style={styles.gameplayContainer}>
           <Text style={styles.prompt}>{round.prompt}</Text>
           
@@ -268,8 +268,8 @@ export default function GameScreen() {
         </View>
       )}
 
-      {((round.status === 'judging' && isJudge) || 
-        (round.status === 'completed' && round.winner_id)) && (
+      {((round.round_status === 'judging' && isJudge) || 
+        (round.round_status === 'completed' && round.winner_id)) && (
         <View style={styles.submissionsContainer}>
           <Text style={styles.prompt}>{round.prompt}</Text>
           <FlatList
@@ -280,7 +280,7 @@ export default function GameScreen() {
         </View>
       )}
 
-      {round.status === 'in_progress' && isJudge && (
+      {round.round_status === 'in_progress' && isJudge && (
         <View style={styles.judgeWaitingContainer}>
           <Text style={styles.prompt}>{round.prompt}</Text>
           <Text style={styles.waitingText}>

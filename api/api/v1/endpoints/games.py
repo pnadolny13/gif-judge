@@ -19,6 +19,10 @@ class PostGamePhrase(BaseModel):
 class StartGameRequest(BaseModel):
     host_id: str
 
+class SubmitRoundPromptRequest(BaseModel):
+    judge_id: str
+    prompt: str
+
 @router.post("/", response_model=Game)
 async def post_game(new_game: PostNewGame):
     """Returns a new game"""
@@ -82,9 +86,9 @@ async def get_round(game_id: str, round_id: str):
     return round
 
 @router.post("/{game_id}/rounds/{round_id}/prompt", response_model=Round)
-async def submit_round_prompt(game_id: str, round_id: str, judge_id: str, prompt: str):
+async def submit_round_prompt(game_id: str, round_id: str, request: SubmitRoundPromptRequest):
     """Submit a prompt for a round"""
-    round = await games.update_round_prompt(game_id, round_id, judge_id, prompt)
+    round = await games.update_round_prompt(game_id, round_id, request.judge_id, request.prompt)
     if not round:
         raise HTTPException(status_code=404, detail="Round not found")
     return round

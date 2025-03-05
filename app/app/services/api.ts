@@ -33,7 +33,7 @@ export interface Round {
   prompt: string;
   submissions: Record<string, GifSubmission>;
   winner_id: string | null;
-  status: 'waiting' | 'in_progress' | 'judging' | 'completed';
+  round_status: 'waiting' | 'in_progress' | 'judging' | 'completed';
   created_at: string;
   ends_at: string | null;
 }
