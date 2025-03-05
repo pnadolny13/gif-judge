@@ -90,7 +90,7 @@ class ApiService {
       const game = await this.handleResponse<Game>(response);
 
       // Then create the host player in that game
-      const playerResponse = await fetch(`${this.API_URL}/game/${game.id}/player`, {
+      const playerResponse = await fetch(`${this.API_URL}/games/${game.id}/players`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

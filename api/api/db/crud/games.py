@@ -5,9 +5,11 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException
 
 async def create_game(name: str) -> Game:
+    """Create a new game with empty player_ids list"""
     game = Game(
         id=str(uuid4()),
-        name=name
+        name=name,
+        player_ids=[]  # Initialize empty player_ids list
     )
     DynamoDB().put_item(
         "games",
@@ -141,7 +143,9 @@ async def get_game(game_id: str) -> Game:
         {"id": game_id}
     )
     if resp:
-        return Game(**resp)
+        game = Game(**resp)
+        # Don't populate players here - let the route handler do it
+        return game
     return None
 
 async def update_game_properties(game_id: str, updates: dict) -> Game:
@@ -168,3 +172,18 @@ async def update_game_properties(game_id: str, updates: dict) -> Game:
     
     print(f"Update response: {resp}")
     return Game(**resp.get("Attributes"))
+
+async def add_player_to_game(game_id: str, player_id: str) -> Game:
+    """Add a player ID to the game's player_ids list"""
+    resp = DynamoDB().update_item(
+        "games",
+        {"id": game_id},
+        "SET player_ids = list_append(if_not_exists(player_ids, :empty), :pid)",
+        {
+            ":pid": [player_id],
+            ":empty": []
+        }
+    )
+    if resp:
+        return Game(**resp.get("Attributes"))
+    return None

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from db.models import Game, Player, Round, GifSubmission
-from db.crud import games
-from typing import Optional
+from db.crud import games, players
+from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -19,14 +19,20 @@ class PostGamePhrase(BaseModel):
 @router.post("/", response_model=Game)
 async def post_game(new_game: PostNewGame):
     """Returns a new game"""
-    return await games.create_game(new_game.name)
+    game = await games.create_game(new_game.name)
+    game.players = []
+    return game
 
 @router.get("/{game_id}", response_model=Game)
 async def get_game(game_id: str):
-    """Returns existing game details"""
+    """Returns existing game details with all player data"""
     game = await games.get_game(game_id)
     if not game:
         raise HTTPException(status_code=404, detail="Game not found")
+    
+    game_players = await players.read_players(game_id)
+    game.players = game_players
+    
     return game
 
 @router.post("/{game_id}", response_model=Game)
@@ -43,7 +49,16 @@ async def update_game(game_id: str, updates: dict):
     game = await games.get_game(game_id)
     if not game:
         raise HTTPException(status_code=404, detail="Game not found")
-    return await games.update_game_properties(game_id, updates)
+    
+    if "players" in updates:
+        del updates["players"]
+    
+    updated_game = await games.update_game_properties(game_id, updates)
+    
+    game_players = await players.read_players(game_id)
+    updated_game.players = game_players
+    
+    return updated_game
 
 # Round-related endpoints
 @router.post("/{game_id}/rounds", response_model=Round)
@@ -86,13 +101,10 @@ async def judge_round(game_id: str, round_id: str, judge_id: str, winner_id: str
     if not round:
         raise HTTPException(status_code=404, detail="Round not found")
     
-    # Update game score for the winner
+    await players.increment_score(winner_id)
+    
     game = await games.get_game(game_id)
-    if game:
-        for player in game.players:
-            if player.id == winner_id:
-                player.game_score = (player.game_score or 0) + 1
-                break
-        game = await games.update_game_properties(game_id, {"players": game.players})
+    game_players = await players.read_players(game_id)
+    game.players = game_players
     
     return {"round": round, "game": game}

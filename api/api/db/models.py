@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Optional, List
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -9,6 +9,8 @@ class Player(BaseModel):
     game_id: str
     name: str
     game_score: Optional[int] = 0
+    is_host: Optional[bool] = False
+    is_judge: Optional[bool] = False
 
 class GifSubmission(BaseModel):
     player_id: str
@@ -34,7 +36,8 @@ class Game(BaseModel):
     phrase: Optional[str] = None
     round_start_ts: Optional[str] = None
     round_end_ts: Optional[str] = None
-    players: list[Player] = Field(default_factory=list)
+    player_ids: List[str] = []
+    players: Optional[List[Player]] = None
     game_status: Optional[str] = None
     host_id: Optional[str] = None
 
