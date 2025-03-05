@@ -17,23 +17,15 @@ export default function LobbyScreen() {
         setGame(updatedGame);
 
         // If the game has started but we're not the host, we need to fetch the current round
-        if (updatedGame.game_status === 'in_progress' && isHost !== 'true') {
-          try {
-            const roundResponse = await fetch(`${api.API_URL}/games/${roomCode}/rounds/current`);
-            if (roundResponse.ok) {
-              const currentRound = await roundResponse.json();
-              router.push({
-                pathname: "/game",
-                params: { 
-                  roomCode,
-                  playerId,
-                  roundId: currentRound.id
-                }
-              });
+        if (updatedGame.game_status === 'in_progress' && isHost !== 'true' && updatedGame.round_id) {
+          router.push({
+            pathname: "/game",
+            params: { 
+              roomCode,
+              playerId,
+              roundId: updatedGame.round_id
             }
-          } catch (error) {
-            console.error('Error fetching current round:', error);
-          }
+          });
         }
       } catch (error) {
         console.error('Error polling game state:', error);

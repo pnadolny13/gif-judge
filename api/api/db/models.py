@@ -32,6 +32,7 @@ class Game(BaseModel):
     id: str
     name: Optional[str] = None
     round_num: Optional[int] = 0
+    round_id: Optional[str] = None
     judge_player_id: Optional[str] = None
     phrase: Optional[str] = None
     round_start_ts: Optional[str] = None

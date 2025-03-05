@@ -143,17 +143,3 @@ async def start_game(game_id: str, request: StartGameRequest):
         "game": game,
         "round": round
     }
-
-@router.get("/{game_id}/rounds/current", response_model=Round)
-async def get_current_round(game_id: str):
-    """Get the current active round for a game"""
-    game = await games.get_game(game_id)
-    if not game:
-        raise HTTPException(status_code=404, detail="Game not found")
-    
-    # Get the most recent round for the game
-    round = await games.get_latest_round(game_id)
-    if not round:
-        raise HTTPException(status_code=404, detail="No rounds found")
-    
-    return round

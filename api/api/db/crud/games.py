@@ -3,6 +3,7 @@ from db.models import Game, Round, GifSubmission
 from uuid import UUID, uuid4
 from datetime import datetime, timedelta
 from fastapi import HTTPException
+from typing import Optional
 
 async def create_game(name: str) -> Game:
     """Create a new game with empty player_ids list"""
@@ -18,7 +19,7 @@ async def create_game(name: str) -> Game:
     return game
 
 async def create_round(game_id: str, judge_id: str) -> Round:
-    """Create a new round for a game"""
+    """Create a new round for a game and update game's round_id"""
     now = datetime.utcnow()
     round = Round(
         id=str(uuid4()),
@@ -27,10 +28,17 @@ async def create_round(game_id: str, judge_id: str) -> Round:
         round_status='waiting',
         created_at=str(now.isoformat()) + 'Z'
     )
+    # Create the round
     DynamoDB().put_item(
         "rounds",
         round.dict()
     )
+    
+    # Update the game's round_id
+    await update_game_properties(game_id, {
+        "round_id": round.id
+    })
+    
     return round
 
 async def get_round(game_id: str, round_id: str) -> Round:
@@ -186,4 +194,24 @@ async def add_player_to_game(game_id: str, player_id: str) -> Game:
     )
     if resp:
         return Game(**resp.get("Attributes"))
+    return None
+
+async def get_latest_round(game_id: str) -> Optional[Round]:
+    """Get the most recent round for a game"""
+    # First get the game to get the current round number
+    game = await get_game(game_id)
+    if not game or not game.round_num:
+        return None
+        
+    # Get the round using game_id and round_num
+    resp = DynamoDB().get_item(
+        "rounds",
+        {
+            "game_id": game_id,
+            "round_num": game.round_num
+        }
+    )
+    
+    if resp:
+        return Round(**resp)
     return None
