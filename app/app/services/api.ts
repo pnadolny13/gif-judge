@@ -215,6 +215,50 @@ class ApiService {
       throw error;
     }
   }
+
+  async startNextRound(roomCode: string, playerId: string): Promise<Round> {
+    try {
+      const response = await fetch(`${this.API_URL}/games/${roomCode}/rounds`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ player_id: playerId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to start next round');
+      }
+      
+      return this.handleResponse<Round>(response);
+    } catch (error) {
+      console.error('Start next round error:', error);
+      throw error;
+    }
+  }
+
+  async getGameAndRound(roomCode: string, roundId: string): Promise<{ game: Game; round: Round }> {
+    try {
+      const [gameResponse, roundResponse] = await Promise.all([
+        fetch(`${this.API_URL}/games/${roomCode}`),
+        fetch(`${this.API_URL}/games/${roomCode}/rounds/${roundId}`)
+      ]);
+
+      if (!gameResponse.ok || !roundResponse.ok) {
+        throw new Error('Failed to fetch game data');
+      }
+
+      const [game, round] = await Promise.all([
+        this.handleResponse<Game>(gameResponse),
+        this.handleResponse<Round>(roundResponse)
+      ]);
+
+      return { game, round };
+    } catch (error) {
+      console.error('Get game and round error:', error);
+      throw error;
+    }
+  }
 }
 
 export const api = new ApiService(); 

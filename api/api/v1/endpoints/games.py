@@ -27,6 +27,9 @@ class JudgeRoundRequest(BaseModel):
     judge_id: str
     winner_id: str
 
+class CreateRoundRequest(BaseModel):
+    player_id: str
+
 @router.post("/", response_model=Game)
 async def post_game(new_game: PostNewGame):
     """Returns a new game"""
@@ -73,13 +76,13 @@ async def update_game(game_id: str, updates: dict):
 
 # Round-related endpoints
 @router.post("/{game_id}/rounds", response_model=Round)
-async def create_game_round(game_id: str, judge_id: str):
+async def create_game_round(game_id: str, request: CreateRoundRequest):
     """Create a new round for a game"""
     game = await games.get_game(game_id)
     if not game:
         raise HTTPException(status_code=404, detail="Game not found")
     
-    return await games.create_round(game_id, judge_id)
+    return await games.create_round(game_id, request.player_id)
 
 @router.get("/{game_id}/rounds/{round_id}", response_model=Round)
 async def get_round(game_id: str, round_id: str):

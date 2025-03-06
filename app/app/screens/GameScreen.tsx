@@ -131,8 +131,37 @@ export default function GameScreen() {
     setIsSubmitting(true);
     try {
       await api.judgeRound(roomCode, roundId, playerId, winnerId);
+      const { game: updatedGame, round: updatedRound } = await api.getGameAndRound(roomCode, roundId);
+      setGame(updatedGame);
+      setRound(updatedRound);
     } catch (error) {
+      console.error('Error selecting winner:', error);
       Alert.alert('Error', 'Failed to select winner. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const startNextRound = async () => {
+    if (!round?.winner_id) {
+      console.error('No winner selected for current round');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const newRound = await api.startNextRound(roomCode, round.winner_id);
+      router.push({
+        pathname: "/game",
+        params: { 
+          roomCode, 
+          playerId, 
+          roundId: newRound.id 
+        }
+      });
+    } catch (error) {
+      console.error('Error starting next round:', error);
+      Alert.alert('Error', 'Failed to start next round. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -290,6 +319,50 @@ export default function GameScreen() {
           </Text>
         </View>
       )}
+
+      {round.round_status === 'completed' && (
+        <View style={styles.winnerContainer}>
+          <Text style={styles.prompt}>{round.prompt}</Text>
+          <Text style={styles.winnerText}>
+            Winner: {game.players.find(p => p.id === round.winner_id)?.name || 'Unknown Player'}
+          </Text>
+          
+          <View style={styles.scoresContainer}>
+            <Text style={styles.scoresTitle}>Current Scores:</Text>
+            {game.players.sort((a, b) => b.score - a.score).map(player => (
+              <Text key={player.id} style={styles.scoreItem}>
+                {player.name}: {player.score} {player.id === round.winner_id && '🏆'}
+              </Text>
+            ))}
+          </View>
+          
+          {isJudge && game.game_status !== 'completed' && (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={startNextRound}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <Text style={styles.buttonText}>Start Next Round</Text>
+              )}
+            </TouchableOpacity>
+          )}
+          
+          {game.game_status === 'completed' && (
+            <TouchableOpacity
+              style={[styles.button, styles.resultsButton]}
+              onPress={() => router.push({
+                pathname: "/results",
+                params: { roomCode, playerId }
+              })}
+            >
+              <Text style={styles.buttonText}>View Final Results</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
     </View>
   );
 }
@@ -400,5 +473,34 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#cccccc',
     textAlign: 'center',
+  },
+  winnerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  winnerText: {
+    fontSize: 24,
+    color: '#ffffff',
+    marginBottom: 20,
+  },
+  scoresContainer: {
+    marginBottom: 20,
+  },
+  scoresTitle: {
+    fontSize: 20,
+    color: '#ffffff',
+    marginBottom: 10,
+  },
+  scoreItem: {
+    fontSize: 18,
+    color: '#ffffff',
+    marginBottom: 5,
+  },
+  resultsButton: {
+    backgroundColor: '#6200ee',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
   },
 }); 
