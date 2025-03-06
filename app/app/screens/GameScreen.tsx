@@ -328,9 +328,9 @@ export default function GameScreen() {
           
           <View style={styles.scoresContainer}>
             <Text style={styles.scoresTitle}>Current Scores:</Text>
-            {game.players.sort((a, b) => b.score - a.score).map(player => (
+            {game.players.sort((a, b) => b.game_score - a.game_score).map(player => (
               <Text key={player.id} style={styles.scoreItem}>
-                {player.name}: {player.score} {player.id === round.winner_id && '🏆'}
+                {player.name}: {player.game_score} {player.id === round.winner_id && '🏆'}
               </Text>
             ))}
           </View>

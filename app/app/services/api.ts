@@ -6,7 +6,7 @@ const GIPHY_API_KEY = process.env.EXPO_PUBLIC_GIPHY_API_KEY;
 export interface Player {
   id: string;
   name: string;
-  score: number;
+  game_score: number;
   game_id: string;
 }
 
