@@ -23,6 +23,10 @@ class SubmitRoundPromptRequest(BaseModel):
     judge_id: str
     prompt: str
 
+class JudgeRoundRequest(BaseModel):
+    judge_id: str
+    winner_id: str
+
 @router.post("/", response_model=Game)
 async def post_game(new_game: PostNewGame):
     """Returns a new game"""
@@ -102,13 +106,13 @@ async def submit_gif(game_id: str, round_id: str, submission: GifSubmission):
     return round
 
 @router.post("/{game_id}/rounds/{round_id}/judge", response_model=dict)
-async def judge_round(game_id: str, round_id: str, judge_id: str, winner_id: str):
+async def judge_round(game_id: str, round_id: str, request: JudgeRoundRequest):
     """Judge a round by selecting a winner"""
-    round = await games.select_winner(game_id, round_id, judge_id, winner_id)
+    round = await games.select_winner(game_id, round_id, request.judge_id, request.winner_id)
     if not round:
         raise HTTPException(status_code=404, detail="Round not found")
     
-    await players.increment_score(winner_id)
+    await players.increment_score(request.winner_id)
     
     game = await games.get_game(game_id)
     game_players = await players.read_players(game_id)
