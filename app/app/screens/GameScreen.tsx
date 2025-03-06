@@ -130,8 +130,7 @@ export default function GameScreen() {
 
     setIsSubmitting(true);
     try {
-      await api.judgeRound(roomCode, roundId, playerId, winnerId);
-      const { game: updatedGame, round: updatedRound } = await api.getGameAndRound(roomCode, roundId);
+      const { round: updatedRound, game: updatedGame } = await api.judgeRound(roomCode, roundId, playerId, winnerId);
       setGame(updatedGame);
       setRound(updatedRound);
     } catch (error) {
@@ -222,7 +221,7 @@ export default function GameScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Round {round.id}</Text>
+        <Text style={styles.title}>Round {game.round_num}</Text>
         <Text style={styles.subtitle}>
           Judge: {game.players.find(p => p.id === round.judge_id)?.name}
         </Text>

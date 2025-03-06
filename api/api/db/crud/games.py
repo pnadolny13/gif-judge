@@ -20,6 +20,13 @@ async def create_game(name: str) -> Game:
 
 async def create_round(game_id: str, judge_id: str) -> Round:
     """Create a new round for a game and update game's round_id"""
+    # First get and update the game's round number
+    game = await get_game(game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    
+    new_round_num = (game.round_num or 0) + 1
+    
     now = datetime.utcnow()
     round = Round(
         id=str(uuid4()),
@@ -28,15 +35,17 @@ async def create_round(game_id: str, judge_id: str) -> Round:
         round_status='waiting',
         created_at=str(now.isoformat()) + 'Z'
     )
+    
     # Create the round
     DynamoDB().put_item(
         "rounds",
         round.dict()
     )
     
-    # Update the game's round_id
+    # Update the game's round_id and round_num
     await update_game_properties(game_id, {
-        "round_id": round.id
+        "round_id": round.id,
+        "round_num": new_round_num
     })
     
     return round
