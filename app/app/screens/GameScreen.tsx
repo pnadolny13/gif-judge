@@ -61,7 +61,7 @@ export default function GameScreen() {
         setGame(gameData);
         setRound(roundData);
 
-        if (gameData.status === 'completed') {
+        if (gameData.game_status === 'completed') {
           router.push({
             pathname: "/results",
             params: { roomCode, playerId }
