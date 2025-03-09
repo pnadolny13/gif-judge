@@ -44,20 +44,8 @@ export default function GameScreen() {
 
     const pollInterval = setInterval(async () => {
       try {
-        const [gameResponse, roundResponse] = await Promise.all([
-          fetch(`${api.API_URL}/games/${roomCode}`),
-          fetch(`${api.API_URL}/games/${roomCode}/rounds/${roundId}`)
-        ]);
-
-        if (!gameResponse.ok || !roundResponse.ok) {
-          throw new Error('Failed to fetch game state');
-        }
-
-        const [gameData, roundData] = await Promise.all([
-          gameResponse.json(),
-          roundResponse.json()
-        ]);
-
+        const { game: gameData, round: roundData } = await api.getGameAndRound(roomCode, roundId);
+        
         setGame(gameData);
         setRound(roundData);
 
